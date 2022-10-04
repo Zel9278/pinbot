@@ -10,29 +10,50 @@ const CHANNEL_ID = "1005729189338554458"
 
 client.on("ready", () => console.log("Bot is ready!"))
 
-client.on("messageReactionAdd", (react, user) => {
-    if (react.message.guildId !== SERVER_ID) return
-    if (react.emoji.name !== "📌") return
-    if (react.count > 1) return
+const reactHandler = async (userId, messageId, emoji, channelId, guildId) => {
+    if (guildId !== SERVER_ID) return
+    if (emoji.name !== "📌") return
 
-    const channel = client.channels.resolve(CHANNEL_ID)
-    if (!channel) return
-    channel.send({
+    const guild = client.guilds.resolve(guildId)
+    const channel = guild?.channels.resolve(channelId)
+    const message = await channel?.messages.fetch(messageId)
+    if (!message) return
+    if (message.reactions.cache.size > 1) return
+
+    const pinChannel = client.channels.resolve(CHANNEL_ID)
+    if (!pinChannel) return
+
+    const user = guild?.members.resolve(userId)?.user
+
+    pinChannel.send({
         embeds: [
             {
                 author: {
-                    name: react.message.author.tag,
-                    iconURL: react.message.author.avatarURL(),
+                    name: message.author.tag,
+                    iconURL: message.author.avatarURL(),
                 },
-                title: `Pinned By. ${user.tag}`,
-                url: react.message.url,
-                description: react.message.content,
+                title: `Pinned By. ${user?.tag}`,
+                url: message.url,
+                description: message.content,
                 footer: {
-                    text: `Message from ${react.message.channel.name}`,
+                    text: `Message from ${message.channel.name}`,
                 },
             },
         ],
     })
+}
+
+client.on("raw", (data) => {
+    const { t, d } = data
+    switch (t) {
+        case "MESSAGE_REACTION_ADD":
+            const { user_id, message_id, emoji, channel_id, guild_id } = d
+            reactHandler(user_id, message_id, emoji, channel_id, guild_id)
+            break
+
+        default:
+            break
+    }
 })
 
 client.login(process.env.TOKEN)

@@ -1,5 +1,5 @@
 {
-    "packageManager": "pnpm@7.13.0",
+    "packageManager": "pnpm@7.13.1",
 	"dependencies": {
 		"discord.js": "14.5.0",
 		"dotenv": "16.0.3"

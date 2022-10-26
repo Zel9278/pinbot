@@ -1,6 +1,10 @@
 require("dotenv").config()
 
-const { Client, GatewayIntentBits } = require("discord.js")
+const {
+    Client,
+    GatewayIntentBits,
+    ApplicationCommandType,
+} = require("discord.js")
 const client = new Client({
     intents: Object.values(GatewayIntentBits).filter(Number.isInteger),
 })
@@ -8,17 +12,37 @@ const client = new Client({
 const SERVER_ID = "990917256290660352"
 const CHANNEL_ID = "1005729189338554458"
 
-client.on("ready", () => console.log("Bot is ready!"))
+client.on("ready", async () => {
+    console.log("Bot is ready!")
+
+    await client.guilds.resolve(SERVER_ID)?.commands.set([
+        {
+            name: "pin",
+            type: ApplicationCommandType.Message,
+        },
+    ])
+})
 
 const reactHandler = async (userId, messageId, emoji, channelId, guildId) => {
     if (guildId !== SERVER_ID) return
     if (emoji.name !== "📌") return
 
+    const message = await client.guilds
+        .resolve(guildId)
+        ?.channels.resolve(channelId)
+        ?.messages.fetch(messageId)
+    if (!message) return
+    if (message.reactions.cache.size > 1) return
+    channelSendHandler(userId, messageId, channelId, guildId)
+}
+
+const channelSendHandler = async (userId, messageId, channelId, guildId) => {
+    if (guildId !== SERVER_ID) return
+
     const guild = client.guilds.resolve(guildId)
     const channel = guild?.channels.resolve(channelId)
     const message = await channel?.messages.fetch(messageId)
     if (!message) return
-    if (message.reactions.cache.size > 1) return
 
     const pinChannel = client.channels.resolve(CHANNEL_ID)
     if (!pinChannel) return
@@ -53,6 +77,19 @@ client.on("raw", (data) => {
 
         default:
             break
+    }
+})
+
+client.on("interactionCreate", (interaction) => {
+    if (!interaction.isMessageContextMenuCommand()) return
+    const { channelId, guildId, user, commandName, targetId } = interaction
+    if (commandName === "pin") {
+        channelSendHandler(user.id, targetId, channelId, guildId)
+        interaction.reply({
+            content: "Pinned!",
+            ephemeral: true,
+        })
+        return
     }
 })
 

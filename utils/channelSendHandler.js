@@ -31,7 +31,5 @@ module.exports = async (userId, messageId, channelId, guildId) => {
                 },
             ],
         })
-        .then((msg) => {
-            message.react("📌")
-        })
+        .then(() => message.react("📌"))
 }

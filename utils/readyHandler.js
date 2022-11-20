@@ -1,12 +1,26 @@
 const { PresenceUpdateStatus } = require("discord.js")
+const commandLoader = require("../commands/index")
+const eventLoader = require("../events/index")
 
 module.exports = (client) => {
     require("../utils/initDatabase.js")({
         sql: new (require("better-sqlite3"))("pinbot.db"),
         client,
     })
-    require("../utils/initInteraction")({ client })
     console.log("Bot is ready!")
+
+    const customCommands = commandLoader(client)
+    const customEvents = eventLoader(client)
+
+    Object.assign(client, {
+        customCommands,
+        customEvents,
+        _rawCommands: customCommands._rawCommands,
+        _rawEvents: customEvents._rawEvents,
+    })
+
+    customCommands.init()
+    customEvents.init()
 
     client.user.presence.set({
         status: "dnd",
@@ -17,5 +31,4 @@ module.exports = (client) => {
             },
         ],
     })
-    require("../events")(client).init()
 }

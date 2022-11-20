@@ -14,20 +14,24 @@ module.exports = async (userId, messageId, channelId, guildId) => {
 
     const user = guild?.members.resolve(userId)?.user
 
-    pinChannel.send({
-        embeds: [
-            {
-                author: {
-                    name: message.author.tag,
-                    iconURL: message.author.avatarURL(),
+    pinChannel
+        .send({
+            embeds: [
+                {
+                    author: {
+                        name: message.author.tag,
+                        iconURL: message.author.avatarURL(),
+                    },
+                    title: `Pinned By. ${user?.tag}`,
+                    url: message.url,
+                    description: message.content,
+                    footer: {
+                        text: `Message from ${message.channel.name}`,
+                    },
                 },
-                title: `Pinned By. ${user?.tag}`,
-                url: message.url,
-                description: message.content,
-                footer: {
-                    text: `Message from ${message.channel.name}`,
-                },
-            },
-        ],
-    })
+            ],
+        })
+        .then((msg) => {
+            message.react("📌")
+        })
 }

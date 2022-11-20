@@ -1,4 +1,5 @@
 const reactHandler = require("../utils/reactHandler")
+const { client } = require("../index")
 
 const raw = {
     name: "raw",
@@ -7,7 +8,15 @@ const raw = {
         switch (t) {
             case "MESSAGE_REACTION_ADD":
                 const { user_id, message_id, emoji, channel_id, guild_id } = d
-                reactHandler(user_id, message_id, emoji, channel_id, guild_id)
+                const isBot = client.users.resolve(user_id).bot
+                reactHandler(
+                    user_id,
+                    message_id,
+                    emoji,
+                    channel_id,
+                    guild_id,
+                    isBot
+                )
                 break
 
             default:

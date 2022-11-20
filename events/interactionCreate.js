@@ -1,17 +1,18 @@
-const channelSendHandler = require("../utils/channelSendHandler")
+const { client } = require("../index")
 
 const interactionCreate = {
     name: "interactionCreate",
     async exec(interaction) {
-        if (!interaction.isMessageContextMenuCommand()) return
-        const { channelId, guildId, user, commandName, targetId } = interaction
-        if (commandName === "pin") {
-            channelSendHandler(user.id, targetId, channelId, guildId)
-            interaction.reply({
-                content: "Pinned!",
-                ephemeral: true,
-            })
-            return
+        if (interaction.user.id === client.id) return
+
+        if (
+            interaction.isChatInputCommand() ||
+            interaction.isMessageContextMenuCommand()
+        ) {
+            const command = client.customCommands.find(
+                (x) => x.data.name == interaction.commandName
+            )
+            await command?.exec?.(interaction)
         }
     },
 }

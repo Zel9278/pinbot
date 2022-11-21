@@ -17,6 +17,11 @@ const set = {
         const channel =
             interaction.options.getChannel("channel") || interaction.channel
         const guild = client.database.getGuild(interaction.guild.id)
+
+        if (guild.channel === channel.id)
+            return interaction.reply(
+                `This channel [${channel}] has already been specified.`
+            )
         if (!guild) {
             guild = {
                 guild: interaction.guild.id,

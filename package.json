@@ -1,7 +1,7 @@
 {
     "packageManager": "pnpm@7.18.1",
     "dependencies": {
-        "better-sqlite3": "8.0.0",
+        "better-sqlite3": "8.0.1",
         "discord.js": "14.7.1",
         "dotenv": "16.0.3"
     },
